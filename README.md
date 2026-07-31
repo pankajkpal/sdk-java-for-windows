@@ -14,6 +14,7 @@ This tool allows you to detect existing Java/JDK installations, switch between t
 
 | Command | Description |
 | :--- | :--- |
+| `sdk help` | List and describe all available commands |
 | `sdk rescan java` | Discover installed JDKs across common system directories |
 | `sdk list java` | List all discovered JDK installations |
 | `sdk use java <id>` | Use specified JDK temporarily in current session (PowerShell & CMD) |
