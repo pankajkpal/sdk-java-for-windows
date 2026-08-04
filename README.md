@@ -1,4 +1,4 @@
-# Windows SDK-Style Java Version Manager
+# Windows SDKMAN inspired Java Version Manager
 
 A robust, SDKMAN!-inspired Java version manager built natively for Windows.
 
