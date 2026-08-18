@@ -23,19 +23,19 @@ VIAddVersionKey "FileDescription" "Windows SDK Java Manager Installer"
 VIAddVersionKey "FileVersion" "${PRODUCT_VERSION}.0"
 VIAddVersionKey "ProductVersion" "${PRODUCT_VERSION}.0"
 
+; --- MultiUser Configuration (must be defined BEFORE including MultiUser.nsh) ---
+!define MULTIUSER_EXECUTIONLEVEL Highest
+!define MULTIUSER_MUI
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+!define MULTIUSER_INSTALLMODE_INSTDIR "WindowsSdkJava"
+!define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
+
 ; --- Includes ---
 !include "MUI2.nsh"
 !include "MultiUser.nsh"
 !include "LogicLib.nsh"
 !include "WinMessages.nsh"
 !include "WordFunc.nsh"
-
-; --- MultiUser Configuration ---
-!define MULTIUSER_EXECUTIONLEVEL Highest
-!define MULTIUSER_MUI
-!define MULTIUSER_INSTALLMODE_COMMANDLINE
-!define MULTIUSER_INSTALLMODE_INSTDIR "WindowsSdkJava"
-!define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
 
 ; --- MUI Configuration ---
 !define MUI_ABORTWARNING
