@@ -1,0 +1,117 @@
+# =============================================================================
+# Build & Release Installer
+# =============================================================================
+# Triggered on version tags (e.g., v1.0.0).
+# Builds an NSIS installer and publishes it as a GitHub Release.
+# =============================================================================
+
+name: Build & Release Installer
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write  # Required to create GitHub Releases and upload assets
+
+jobs:
+  build:
+    name: Build Installer & Create Release
+    runs-on: windows-latest
+
+    steps:
+      # -------------------------------------------------------------------
+      # 1. Checkout the repository
+      # -------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------------------
+      # 2. Install NSIS via Chocolatey
+      # -------------------------------------------------------------------
+      - name: Install NSIS
+        run: choco install nsis -y --no-progress
+
+      # -------------------------------------------------------------------
+      # 3. Add NSIS to PATH so makensis.exe is available
+      # -------------------------------------------------------------------
+      - name: Add NSIS to PATH
+        run: |
+          echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      # -------------------------------------------------------------------
+      # 4. Extract version from the Git tag
+      #    Strips the 'v' prefix (e.g., v1.0.0 → 1.0.0) and exports it
+      #    as both a step output and an environment variable.
+      # -------------------------------------------------------------------
+      - name: Extract version from tag
+        id: version
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          Write-Host "Version: $version"
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "PRODUCT_VERSION=$version" >> $env:GITHUB_ENV
+
+      # -------------------------------------------------------------------
+      # 5. Stage files for the installer
+      #    Creates the dist directory structure and copies the required
+      #    files that the NSIS script expects.
+      # -------------------------------------------------------------------
+      - name: Stage files for installer
+        run: |
+          # Create the distribution directories
+          New-Item -ItemType Directory -Path "installer\dist" -Force | Out-Null
+          New-Item -ItemType Directory -Path "installer\dist\src" -Force | Out-Null
+
+          # Copy the main entry point
+          Copy-Item -Path "sdk.cmd" -Destination "installer\dist\" -Force
+          Write-Host "Staged: sdk.cmd"
+
+          # Copy all PowerShell source files
+          Copy-Item -Path "src\*.ps1" -Destination "installer\dist\src\" -Force
+          Write-Host "Staged: src\*.ps1"
+
+          # Show staged files for debugging
+          Write-Host "`nStaged files:"
+          Get-ChildItem -Path "installer\dist" -Recurse | ForEach-Object {
+            Write-Host "  $($_.FullName)"
+          }
+
+      # -------------------------------------------------------------------
+      # 6. Build the NSIS installer
+      #    Passes the version as a define so the .nsi script can use it
+      #    in the installer metadata and output filename.
+      # -------------------------------------------------------------------
+      - name: Build NSIS installer
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          Write-Host "Building installer for version $version ..."
+          makensis.exe /V3 /DPRODUCT_VERSION=$version installer\installer.nsi
+
+      # -------------------------------------------------------------------
+      # 7. Create GitHub Release and upload the installer
+      #    Uses softprops/action-gh-release to create a release with
+      #    auto-generated release notes and the installer EXE attached.
+      # -------------------------------------------------------------------
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/WindowsSdkJava-Setup-*.exe
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            ### Option 1: Download the Installer
+            Download `WindowsSdkJava-Setup-${{ steps.version.outputs.version }}.exe` from the assets below and run it.
+
+            ### Option 2: One-Liner Install (PowerShell)
+            ```powershell
+            irm https://raw.githubusercontent.com/pankajkpal/sdk-java-for-windows/main/install-online.ps1 | iex
+            ```
+
+            ## Getting Started
+            After installation, open a new terminal and run:
+            ```
+            sdk rescan java
+            sdk list java
+            ```
