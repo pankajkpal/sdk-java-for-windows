@@ -1,4 +1,4 @@
-# Windows SDKMAN inspired Java Version Manager
+# Windows SDK-Style Java Version Manager
 
 A robust, SDKMAN!-inspired Java version manager built natively for Windows.
 
@@ -14,7 +14,6 @@ This tool allows you to detect existing Java/JDK installations, switch between t
 
 | Command | Description |
 | :--- | :--- |
-| `sdk help` | List and describe all available commands |
 | `sdk rescan java` | Discover installed JDKs across common system directories |
 | `sdk list java` | List all discovered JDK installations |
 | `sdk use java <id>` | Use specified JDK temporarily in current session (PowerShell & CMD) |
@@ -74,41 +73,87 @@ Checks profile integration, `JAVA_HOME` validity, catalog existence, and `PATH` 
 
 ---
 
-## 📦 Installation & Uninstallation
+## 📦 Installation
 
-### Installation Steps
+### Option 1: One-Liner Install (Recommended)
 
-1. **Open PowerShell** (Windows PowerShell 5.1 or PowerShell Core 7+).
-2. **Navigate** to the repository folder:
+Open **PowerShell** and run:
+
+```powershell
+irm https://raw.githubusercontent.com/pankajkpal/sdk-java-for-windows/main/install-online.ps1 | iex
+```
+
+This downloads everything, installs to `C:\Tools\WindowsSdkJava`, and configures your PATH and PowerShell profile automatically.
+
+### Option 2: Download the Installer
+
+1. Go to the [**Releases**](https://github.com/pankajkpal/sdk-java-for-windows/releases) page.
+2. Download the latest `WindowsSdkJava-Setup-x.x.x.exe`.
+3. Run the installer — choose **"Install for all users"** (requires Admin) or **"Just for me"**.
+4. Restart your terminal.
+
+### Option 3: Manual Install (Clone & Run)
+
+1. **Clone** the repository:
    ```powershell
-   cd c:\path\to\sdk-java-for-windows
+   git clone https://github.com/pankajkpal/sdk-java-for-windows.git
+   cd sdk-java-for-windows
    ```
-3. **Run the installation script**:
-   * **For Current User (Default):**
-     ```powershell
-     .\install.ps1
-     ```
-   * **For Machine-Wide Installation (Requires Admin):**
-     ```powershell
-     .\install.ps1 -Admin
-     ```
-4. **Restart your Terminal** (PowerShell or Command Prompt) to refresh PATH and profile bindings.
-5. **Initialize your Java catalog**:
+2. **Run the install script**:
    ```powershell
-   sdk rescan java
-   sdk list java
+   # For Current User (Default):
+   .\install.ps1
+
+   # For Machine-Wide Installation (Requires Admin):
+   .\install.ps1 -Admin
    ```
+3. **Restart your terminal** to refresh PATH and profile bindings.
+
+### After Installation
+
+Open a **new terminal** (PowerShell or Command Prompt) and initialize:
+
+```powershell
+sdk rescan java
+sdk list java
+```
 
 ---
 
-### Uninstallation Steps
+## 🗑️ Uninstallation
+
+**If installed via the EXE installer:**
+- Open **Settings → Apps & Features**, find **"Windows SDK Java Manager"**, and click **Uninstall**.
+- Or run `Uninstall.exe` from the installation directory.
+
+**If installed via one-liner or manual install:**
 
 Open PowerShell in the repository folder and run:
-* **For Current User:**
-  ```powershell
-  .\uninstall.ps1
-  ```
-* **For Machine-Wide Uninstallation:**
-  ```powershell
-  .\uninstall.ps1 -Admin
-  ```
+```powershell
+# For Current User:
+.\uninstall.ps1
+
+# For Machine-Wide Uninstallation:
+.\uninstall.ps1 -Admin
+```
+
+---
+
+## 🔧 Building the Installer (For Contributors)
+
+To build the NSIS installer locally:
+
+1. **Install NSIS** (any of these methods):
+   ```powershell
+   winget install NSIS.NSIS    # or
+   choco install nsis -y       # or
+   scoop install nsis
+   ```
+2. **Run the build script**:
+   ```powershell
+   cd installer
+   .\build.ps1 -Version "1.0.0"
+   ```
+3. The installer EXE will be generated in the `installer\` directory.
+
+> **Note:** When you push a version tag (e.g., `git tag v1.0.0 && git push --tags`), GitHub Actions automatically builds the installer and publishes it to the [Releases](https://github.com/pankajkpal/sdk-java-for-windows/releases) page.
